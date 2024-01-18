@@ -1,0 +1,103 @@
+version: '3'
+
+env:
+  ENV: local
+
+dotenv: ['.env', '.env.{{.ENV}}']
+
+tasks:
+
+  default:
+    cmds:
+      - task --list-all
+
+  anvil:
+    cmds:
+      - anvil --block-time 10
+
+  contracts-build:
+    dir: contracts
+    cmds:
+      - forge fmt
+      - forge build
+
+  contracts-deploy:
+    - task: fundme-deploy
+    - task: cryptozombies-deploy
+
+  contracts-test:
+    dir: contracts
+    cmds:
+      - forge test -vvv --gas-report
+
+  contracts-gas:
+    dir: contracts
+    cmds:
+      - forge snapshot
+
+  fundme-test:
+    dir: contracts
+    cmds:
+      - forge test --match-path *fundme.*.sol -vvv --gas-report --fork-url {{.RPC_URL}} 
+
+  fundme-deploy:
+    dir: contracts/script
+    cmds:
+      - forge script --rpc-url {{.RPC_URL}}
+                     --account {{.KEYSTORE_ACCOUNT}}
+                     --sender {{.PUBLIC_KEY}}
+                     --broadcast
+                     --password-file "../.password"
+                     DeployFundMe
+
+  cryptozombies-deploy:
+    dir: contracts/script
+    cmds:
+      - forge script --rpc-url {{.RPC_URL}}
+                     --account {{.KEYSTORE_ACCOUNT}}
+                     --sender {{.PUBLIC_KEY}}
+                     --broadcast
+                     --password-file "../.password"
+                     DeployZombieOwnership
+
+  fundme-deploy-dryrun:
+    dir: contracts/script
+    cmds:
+      - forge script --rpc-url {{.RPC_URL}}
+                     --account {{.KEYSTORE_ACCOUNT}}
+                     --sender {{.PUBLIC_KEY}}
+                     --password-file "../.password"
+                     DeployFundMe
+
+  fundme-FundFundMe:
+    dir: contracts/script
+    cmds:
+      - forge script --rpc-url {{.RPC_URL}}
+                     --account {{.KEYSTORE_ACCOUNT}}
+                     --sender {{.PUBLIC_KEY}}
+                     --broadcast
+                     --password-file "../.password"
+                     InteractionsFundMe.s.sol:FundFundMe
+
+  fundme-WithdrawFundMe:
+    dir: contracts/script
+    cmds:
+      - forge script --rpc-url {{.RPC_URL}}
+                     --account {{.KEYSTORE_ACCOUNT}}
+                     --sender {{.PUBLIC_KEY}}
+                     --broadcast
+                     --password-file "../.password"
+                     InteractionsFundMe.s.sol:WithdrawFundMe
+
+  frontend-build:
+    dir: dapp
+    cmds:
+      - pnpm i
+      - pnpm run coverage
+      - pnpm run build
+
+  frontend-run:
+    dir: dapp
+    deps: [frontend-build]
+    cmds:
+      - pnpm run dev

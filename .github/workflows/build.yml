@@ -1,0 +1,84 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+env:
+  FOUNDRY_PROFILE: ci
+
+jobs:
+
+  foundry:
+    name: Foundry project
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: contracts
+    strategy:
+      fail-fast: true
+    steps:
+      - uses: actions/checkout@master
+        with:
+          submodules: recursive
+      - name: Install Task
+        uses: arduino/setup-task@v2
+        with:
+          version: 3.x
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+      - name: Run Forge build
+        run: |
+          forge --version
+          task contracts-build
+        id: build
+      - name: Run Forge tests
+        run: |
+          task contracts-test
+        id: test
+
+  dapp:
+    name: Vue.js dapp
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: dapp
+    steps:
+    - uses: actions/checkout@master
+      with:
+        fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+    - uses: actions/setup-node@master
+      with:
+        node-version: 20
+    - name: Install pnpm 
+      uses: pnpm/action-setup@v2
+      with:
+        version: latest
+        run_install: false
+        node-version: 20
+    - name: Install Foundry
+      uses: foundry-rs/foundry-toolchain@v1
+      with:
+        version: nightly
+    - name: Install Task
+      uses: arduino/setup-task@v2
+      with:
+        version: 3.x
+    - name: Generate ABI with foundry
+      run: task contracts-build
+    - name: Installing project dependencies
+      run: pnpm install
+    - name: Build and tests
+      run: |
+        pnpm run build
+        pnpm run coverage
+    - name: SonarCloud Scan
+      uses: SonarSource/sonarcloud-github-action@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

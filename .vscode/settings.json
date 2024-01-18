@@ -1,0 +1,13 @@
+{
+  "solidity.packageDefaultDependenciesContractsDirectory": "contracts/src",
+  "solidity.packageDefaultDependenciesDirectory": "contracts/lib",
+  "editor.formatOnSave": true,
+  "[solidity]": {
+    "editor.defaultFormatter": "JuanBlanco.solidity"
+  },
+  "solidity.formatter": "forge",
+  "solidity.compileUsingRemoteVersion": "v0.8.20",
+  "sonarlint.connectedMode.project": {
+    "projectKey": "icyfry_sandbox-foundry"
+  }
+}
