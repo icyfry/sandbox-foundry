@@ -1,6 +1,6 @@
 # Sandbox Foundry
 
-<img src="https://img.shields.io/badge/solidity-0.8.13-005850?style=flat"> <img src="https://img.shields.io/badge/Vue.js-35495E?logo=vuedotjs&logoColor=4FC08D" /> <img src="https://img.shields.io/badge/-Ethereum-005850?style=flat&logo=Ethereum">
+<img src="https://img.shields.io/badge/solidity-0.8.13-005850?style=flat"> <img src="https://img.shields.io/badge/Vue.js-35495E?logo=vuedotjs&logoColor=4FC08D" />
 [![Build](https://github.com/icyfry/sandbox-foundry/actions/workflows/build.yml/badge.svg)](https://github.com/icyfry/sandbox-foundry/actions/workflows/build.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=icyfry_sandbox-foundry&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=icyfry_sandbox-foundry)
 
@@ -46,7 +46,6 @@ then add the password in `contracts/.password` file and `PUBLIC_KEY_LOCAL` publi
 ### VSCode Configuration
 
 * https://book.getfoundry.sh/config/vscode
-* https://marketplace.visualstudio.com/items?itemName=JuanBlanco.solidity
 
 ## Frontend
 
@@ -88,12 +87,9 @@ task frontend-build frontend-run
 
 ## Resources
 
-* https://www.cyfrin.io/blog/top-web3-tools-for-developers
 * https://github.com/foundry-rs/foundry
 * https://book.getfoundry.sh/
 * https://docs.soliditylang.org/en/v0.8.23/
 * Cyfrin
     * https://updraft.cyfrin.io/courses/foundry
     * https://updraft.cyfrin.io/courses/advanced-foundry
-* https://github.com/ChainSafe/web3js-example-react-app
-* https://docs.web3js.org/

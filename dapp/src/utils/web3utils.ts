@@ -1,5 +1,5 @@
 import { MetaMaskInpageProvider } from "@metamask/providers";
-import Web3, { Contract, Web3ContractError } from 'web3';
+import { ethers } from "ethers";
 
 // Foundry generated contracts and broadcasts
 import cryptozombiesABI from '../../../contracts/out/zombieownership.sol/ZombieOwnership.json';
@@ -15,12 +15,13 @@ console.log("ENV:" + process.env.NODE_ENV);
 
 export class Web3Utils {
 
-    private web3js!: Web3;
+    private provider!: ethers.BrowserProvider;
+    private signer!: ethers.Signer;
     private ethereum!: MetaMaskInpageProvider;
     public account!: string;
     public networkId!: bigint;
-    public cryptoZombiesContract!: Contract<any>;
-    public fundmeContract!: Contract<any>;
+    public cryptoZombiesContract!: ethers.Contract;
+    public fundmeContract!: ethers.Contract;
 
     async getCryptozombiesBroadcastLocal(): Promise<any> {
         // if (process.env.NODE_ENV !== 'development') throw new Error("Not in development mode");
@@ -99,23 +100,30 @@ export class Web3Utils {
 
             if (this.ethereum == undefined) throw new Error("Provider not found");
 
-            this.ethereum.request({ method: 'eth_requestAccounts' });
-            this.web3js = new Web3(this.ethereum);
-
-            this.web3js.eth.getAccounts().then((accounts: any[]) => {
-                this.account = this.web3js.utils.toChecksumAddress(accounts[0]);
+            this.provider = new ethers.BrowserProvider(this.ethereum);
+            this.provider.send("eth_requestAccounts", []).then(async () => {
+                this.signer = await this.provider.getSigner();
+                this.account = await this.signer.getAddress();
                 console.log("Account: " + this.account);
-            });
 
-            this.web3js.eth.net.getId().then((id: bigint) => {
-                this.networkId = id
+                const network = await this.provider.getNetwork();
+                this.networkId = BigInt(network.chainId);
+
                 this.getCryptozombiesContractAddress(this.networkId).then((address) => {
-                    const cryptozombiesContractAddress = address as string
-                    this.cryptoZombiesContract = new this.web3js.eth.Contract(cryptozombiesABI.abi, cryptozombiesContractAddress);
+                    const cryptozombiesContractAddress = address as string;
+                    this.cryptoZombiesContract = new ethers.Contract(
+                        cryptozombiesContractAddress,
+                        cryptozombiesABI.abi,
+                        this.signer
+                    );
                 });
                 this.getFundmeContractAddress(this.networkId).then((address) => {
-                    const fundmeContractAddress = address as string
-                    this.fundmeContract = new this.web3js.eth.Contract(fundmeABI.abi, fundmeContractAddress);
+                    const fundmeContractAddress = address as string;
+                    this.fundmeContract = new ethers.Contract(
+                        fundmeContractAddress,
+                        fundmeABI.abi,
+                        this.signer
+                    );
                 });
             });
 
@@ -124,105 +132,60 @@ export class Web3Utils {
         }
     }
 
-    createRandomZombie(name: string) {
-        // Send the tx to our contract:
-        this.cryptoZombiesContract.methods.createRandomZombie(name)
-            .send({ from: this.account })/*.then(() => {
-                console.log("then");
-            })*/
-            .on("receipt", function (receipt: any) {
-                console.log("Successfully created " + name + "! (" + receipt + ")");
-            })
-            .on("error", function (error: any) {
-                console.error(error);
-            });
+    async createRandomZombie(name: string) {
+        try {
+            const tx = await this.cryptoZombiesContract.createRandomZombie(name);
+            const receipt = await tx.wait();
+            console.log("Successfully created " + name + "! (" + JSON.stringify(receipt) + ")");
+        } catch (error) {
+            console.error(error);
+        }
     }
 
     async getZombiesForAccount(): Promise<Zombie[]> {
 
-        if (this.cryptoZombiesContract == null) { throw new Error("Contract not initialized"); }
+        if (!this.cryptoZombiesContract) throw new Error("Contract not initialized");
 
         const zombies: Zombie[] = [];
-        console.log("getZombiesByOwner " + this.account);
-        this.cryptoZombiesContract.methods.getZombiesByOwner(this.account).call().then(
-            (value: any) => {
-                console.log(value);
-                value.forEach((id: number) => {
-                    this.cryptoZombiesContract.methods.zombies(id).call().then(
-                        function (zombie: any) {
-                            zombies.push(zombie as Zombie);
-                        })
-                });
+        try {
+            // Appel direct de la fonction view du contrat
+            const zombieIds: bigint[] = await this.cryptoZombiesContract.getZombiesByOwner(this.account);
+            for (const id of zombieIds) {
+                const zombie: Zombie = await this.cryptoZombiesContract.zombies(id);
+                zombies.push(zombie);
             }
-        ).catch(
-            function (reason: any) {
-                console.error(reason);
-            }
-        )
-        console.log("Zombies: " + zombies)
-        return zombies;
+            console.log("Zombies:", zombies);
+            return zombies;
+        } catch (error) {
+            console.error(error);
+            return [];
+        }
     }
 
     zombieToOwner(id: string) {
-        return this.cryptoZombiesContract.methods.zombieToOwner(id).call();
+        return this.cryptoZombiesContract.zombieToOwner(id);
     }
 
-    withdraw() {
+    async withdraw() {
         console.log(`Withdrawing...`)
         try {
-            const transaction = this.fundmeContract.methods.withdraw();
-
-            transaction.send({ from: this.account })
-                .on('transactionHash', function (hash: string) {
-                    console.log(hash);
-                })
-                .on('confirmation', function (confirmation: { confirmations: bigint, receipt: { transactionHash: string, transactionIndex: bigint, blockHash: string, blockNumber: bigint, from: string }, latestBlockHash: string }) {
-                    console.log(confirmation);
-                })
-                .on('receipt', function (receipt: any) { // type ReceiptOutput
-                    console.log(receipt);
-                })
-                .on('error', function (error: Web3ContractError) {
-                    console.log(error);
-                }).then(function (receipt: any) { // type ReceiptOutput
-                    console.log(receipt)
-                })
-                .catch((error: any) => {
-                    console.error(error);
-                });
-
+            const tx = await this.fundmeContract.withdraw();
+            const r = await tx.wait();
+            console.log(r);
         } catch (error) {
             console.error(error)
         }
     }
 
-    fund(ethAmount: any) {
+    async fund(ethAmount: any) {
         console.log(`Funding with ${ethAmount}`)
         try {
 
-            const transaction = this.fundmeContract.methods.fund({
-                value: this.web3js.utils.toWei(ethAmount, "ether"),
+            const tx = await this.fundmeContract.fund({
+                value: ethers.parseEther(ethAmount)
             });
-
-            transaction.send({ from: this.account })
-                .on('transactionHash', function (hash: string) {
-                    console.log(hash);
-                })
-                .on('confirmation', function (confirmation: { confirmations: bigint, receipt: { transactionHash: string, transactionIndex: bigint, blockHash: string, blockNumber: bigint, from: string }, latestBlockHash: string }) {
-                    console.log(confirmation);
-                })
-                .on('receipt', function (receipt: any) { // type ReceiptOutput
-                    console.log(receipt);
-                })
-                .on('error', function (error: Web3ContractError) {
-                    console.log(error);
-                })
-                .then(function (receipt: any) { // type ReceiptOutput
-                    console.log(receipt)
-                })
-                .catch((error: any) => {
-                    console.error(error);
-                });
+            const r = await tx.wait();
+            console.log(r);
 
         } catch (error) {
             console.error(error)
@@ -230,17 +193,17 @@ export class Web3Utils {
     }
 
     async getBalance(): Promise<string> {
-        let res: string = "?"
+        let res: string = "?";
         try {
-            const balance = await this.web3js.eth.getBalance(String(this.fundmeContract.options.address))
-            res = this.web3js.utils.fromWei(balance, "ether")
+            if (!this.provider || !this.fundmeContract) throw new Error("Provider or contract not initialized");
+            const address = await this.fundmeContract.getAddress();
+            const balance = await this.provider.getBalance(address);
+            res = ethers.formatEther(balance);
         } catch (error) {
-            console.log(error)
+            console.log(error);
         }
         return res;
     }
-
-
 
 }
 export interface Zombie {

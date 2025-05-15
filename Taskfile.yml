@@ -28,7 +28,7 @@ tasks:
   contracts-test:
     dir: contracts
     cmds:
-      - forge test -vvv --gas-report
+      - forge test --gas-report
 
   contracts-gas:
     dir: contracts
