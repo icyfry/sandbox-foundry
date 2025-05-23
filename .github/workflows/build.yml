@@ -35,7 +35,7 @@ jobs:
       - name: Run Forge build
         run: |
           forge --version
-          task contracts-build
+          task contracts-install-libs contracts-build
         id: build
       - name: Run Forge tests
         run: |
@@ -70,7 +70,7 @@ jobs:
       with:
         version: 3.x
     - name: Generate ABI with foundry
-      run: task contracts-build
+      run: task contracts-install-libs contracts-build
     - name: Installing project dependencies
       run: pnpm install
     - name: Build and tests

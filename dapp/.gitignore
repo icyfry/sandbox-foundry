@@ -7,15 +7,20 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
+# Runtime data
+node_modules/*
+!node_modules/.gitkeep
+dist/*
+!dist/.gitkeep
 dist-ssr
 *.local
-coverage
+coverage/*
+!coverage/.gitkeep
+.pnpm-store/*
+!.pnpm-store/.gitkeep
 
 # Editor directories and files
 .vscode/*
-!.vscode/extensions.json
 .idea
 .DS_Store
 *.suo

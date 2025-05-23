@@ -1,6 +1,9 @@
-# Dotenv file
+# Dotenv files
 .env
-.env.local
-.env.mainnet
-.env.sepolia
+.env.*
+!.env.template
+.password
+
+# Configuration files
+.vscode
 .password
