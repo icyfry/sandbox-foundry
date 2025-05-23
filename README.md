@@ -10,32 +10,41 @@ Courses used in the repository
 * [Cryptozombies](https://cryptozombies.io/en/)
 * [Cyfrin Foundry](https://updraft.cyfrin.io/courses/foundry)
 
-`contracts` folder contain Cryptozombies smart contracts and `dapp` folder contain a Vue.js frontend
+`contracts` folder contain courses smart contracts and `dapp` folder contain a Vue.js frontend to interact with the contracts
 
 ## Install and config
 
-[Doc to install foundry](https://book.getfoundry.sh/getting-started/installation)
+### VSCode Configuration
 
+* https://book.getfoundry.sh/config/vscode
+
+### Docker
+
+The project use a docker image to build and deploy
+
+Create the docker image
 ```bash
-curl -L https://foundry.paradigm.xyz | bash
-source ~/.bashrc
-foundryup
+docker build -t sandbox-foundry .
 ```
 
-[Creating a new foundry project](https://book.getfoundry.sh/projects/creating-a-new-project)
-```
-forge init
+Run the docker container to interact with the project with `task docker` or
+```bash
+docker run -it --rm -v $(pwd)/contracts:/home/node/contracts -v foundry_sandbox_lib:/home/node/contracts/lib -v /home/node/contracts/out -v /home/node/contracts/cache -v $(pwd)/dapp:/home/node/dapp -v foundry_sandbox_dapp_modules:/home/node/dapp/node_modules -v /home/node/dapp/.pnpm-store --user node sandbox-foundry bash
 ```
 
-Install OpenZeppelin
-```
-forge install OpenZeppelin/openzeppelin-contracts --no-commit
-forge install smartcontractkit/chainlink-brownie-contracts@0.8.0 --no-commit
+* `/home/node/dapp` contain the vue dapp
+* `/home/node/contracts` contain the contracts
+
+### Forge
+
+Install forge libs inside docker
+```bash
+task contracts-install-libs
 ```
 
 If needed, to init remappings use `forge remappings > remappings.txt`
 
-### Add private key to foundry keystore
+#### Add private key to foundry keystore
 
 ```bash
 cast wallet import defaultKey --interactive
@@ -43,45 +52,40 @@ cast wallet import defaultKey --interactive
 
 then add the password in `contracts/.password` file and `PUBLIC_KEY_LOCAL` public key in `.env`
 
-### VSCode Configuration
+## Tests
 
-* https://book.getfoundry.sh/config/vscode
-
-## Frontend
-
-The frontend in `dapp` has been created with [vitejs](https://vitejs.dev/guide/) and [vitest](https://vitest.dev/guide/) for unit testing 
-
-
-## Test Contracts
+### Test Contracts
 
 Run tests on contracts
-```
+```bash
 task contracts-test
+```
 or
+```bash
 forge test --fork-url <URL>
 ```
 
 Test call with cast for Cryptozombies
-```
+```bash
 cast call 0x... "getZombiesByOwner(address _owner)" "0x..."
 ```
 
-### Gas
-
 Create a gas usage snapshot file `.gas-snapshot` with `forge snapshot`
 
-## Run Contracts and Frontend
+### Run Contracts and Frontend
+
+The frontend in `dapp` has been created with [vitejs](https://vitejs.dev/guide/) and [vitest](https://vitest.dev/guide/) for unit testing 
 
 Launch a local testnet node, see [Anvil doc](https://book.getfoundry.sh/reference/anvil/)
-```
+```bash
 anvil
 ```
 Build and deploy contracts
-```
+```bash
 task contracts-build contracts-deploy
 ```
 Launch frontend
-```
+```bash
 task frontend-build frontend-run
 ```
 
@@ -89,6 +93,7 @@ task frontend-build frontend-run
 
 * https://github.com/foundry-rs/foundry
 * https://book.getfoundry.sh/
+* [Install foundry](https://book.getfoundry.sh/getting-started/installation)
 * https://docs.soliditylang.org/en/v0.8.23/
 * Cyfrin
     * https://updraft.cyfrin.io/courses/foundry

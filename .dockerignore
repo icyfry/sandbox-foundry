@@ -1,0 +1,10 @@
+# Contracts
+contracts/cache
+contracts/lib
+contracts/out
+
+# Dapp
+dapp/node_modules
+dapp/dist
+dapp/coverage
+dapp/.pnpm-store

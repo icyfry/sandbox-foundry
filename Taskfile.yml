@@ -11,6 +11,25 @@ tasks:
     cmds:
       - task --list-all
 
+  docker:
+    cmds:
+      - docker run -it --rm 
+        -v $(pwd)/contracts:/home/node/contracts
+        -v foundry_sandbox_lib:/home/node/contracts/lib
+        -v /home/node/contracts/out
+        -v /home/node/contracts/cache
+        -v $(pwd)/dapp:/home/node/dapp
+        -v foundry_sandbox_dapp_modules:/home/node/dapp/node_modules
+        -v /home/node/dapp/.pnpm-store 
+        --user node sandbox-foundry bash
+
+  contracts-install-libs:
+    dir: contracts
+    cmds:
+      - forge install --no-git foundry-rs/forge-std
+      - forge install --no-git OpenZeppelin/openzeppelin-contracts
+      - forge install --no-git smartcontractkit/chainlink-brownie-contracts
+
   anvil:
     cmds:
       - anvil --block-time 10
@@ -38,7 +57,7 @@ tasks:
   fundme-test:
     dir: contracts
     cmds:
-      - forge test --match-path *fundme.*.sol -vvv --gas-report --fork-url {{.RPC_URL}} 
+      - forge test --match-path *fundme.*.sol --gas-report --fork-url {{.RPC_URL}} 
 
   fundme-deploy:
     dir: contracts/script
@@ -92,6 +111,8 @@ tasks:
   frontend-build:
     dir: dapp
     cmds:
+      - pnpm audit
+      - pnpm outdated
       - pnpm i
       - pnpm run coverage
       - pnpm run build
