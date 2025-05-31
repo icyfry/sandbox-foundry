@@ -1,6 +1,6 @@
 # Sandbox Foundry
 
-<img src="https://img.shields.io/badge/solidity-0.8.13-005850?style=flat"> <img src="https://img.shields.io/badge/Vue.js-35495E?logo=vuedotjs&logoColor=4FC08D" />
+<img src="https://img.shields.io/badge/solidity-0.8.30-005850?style=flat"> <img src="https://img.shields.io/badge/Vue.js-35495E?logo=vuedotjs&logoColor=4FC08D" />
 [![Build](https://github.com/icyfry/sandbox-foundry/actions/workflows/build.yml/badge.svg)](https://github.com/icyfry/sandbox-foundry/actions/workflows/build.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=icyfry_sandbox-foundry&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=icyfry_sandbox-foundry)
 
@@ -94,7 +94,7 @@ task frontend-build frontend-run
 * https://github.com/foundry-rs/foundry
 * https://book.getfoundry.sh/
 * [Install foundry](https://book.getfoundry.sh/getting-started/installation)
-* https://docs.soliditylang.org/en/v0.8.23/
+* https://docs.soliditylang.org/en/v0.8.30/
 * Cyfrin
     * https://updraft.cyfrin.io/courses/foundry
     * https://updraft.cyfrin.io/courses/advanced-foundry
