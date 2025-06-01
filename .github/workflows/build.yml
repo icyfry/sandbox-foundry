@@ -53,14 +53,11 @@ jobs:
       with:
         fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
     - uses: actions/setup-node@master
-      with:
-        node-version: 20
     - name: Install pnpm 
-      uses: pnpm/action-setup@v4
+      uses: pnpm/action-setup@v4.1.0
       with:
         version: latest
         run_install: false
-        node-version: 20
     - name: Install Foundry
       uses: foundry-rs/foundry-toolchain@v1
       with:
@@ -78,7 +75,7 @@ jobs:
         pnpm run build
         pnpm run coverage
     - name: SonarCloud Scan
-      uses: SonarSource/sonarcloud-github-action@master
+      uses: SonarSource/sonarqube-scan-action@master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
