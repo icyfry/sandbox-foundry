@@ -12,17 +12,17 @@
   },
   "dependencies": {
     "@metamask/providers": "^22.1.0",
-    "ethers": "^6.14.1",
-    "vue": "^3.5.14"
+    "ethers": "^6.15.0",
+    "vue": "^3.5.17"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.4",
-    "@vitest/coverage-v8": "^3.1.4",
-    "eslint": "^9.27.0",
+    "@vitest/coverage-v8": "^3.2.4",
+    "eslint": "^9.31.0",
     "typescript": "^5.8.3",
     "vite": "^6.3.5",
     "vite-plugin-eslint": "^1.8.1",
-    "vitest": "^3.1.4",
-    "vue-tsc": "^2.2.10"
+    "vitest": "^3.2.4",
+    "vue-tsc": "^3.0.3"
   }
 }
